@@ -19,6 +19,16 @@ class MazeGame {
         this.solutionPath = [];
         this.showingSolution = false;
         
+        // Character selection system
+        this.selectedCharacter = localStorage.getItem('mazeGameCharacter') || '❤️';
+        this.characterOptions = {
+            'faces': ['😀', '😎', '🤓', '😇', '🥳', '🤩', '😊', '🙂', '😍', '🤯', '🤔', '😴'],
+            'animals': ['🐱', '🐶', '🐼', '🐨', '🦊', '🐸', '🐧', '🦆', '🦀', '🐙', '🦋', '🐝'],
+            'objects': ['⚡', '🔥', '💎', '⭐', '🌟', '💫', '🎯', '🎪', '🎭', '🎨', '🎵', '⚽'],
+            'nature': ['🌺', '🌸', '🌞', '🌙', '☀️', '🌈', '🦋', '🌿', '🌊', '🍀', '🌵', '🌳'],
+            'food': ['🍕', '🍔', '🎂', '🍎', '🍊', '🥨', '🧀', '🍪', '🍓', '🥑', '🌮', '🍜']
+        };
+        
         // Canvas and maze settings
         this.cellSize = 20;
         this.wallThickness = 2;
@@ -37,6 +47,7 @@ class MazeGame {
         
         this.initializeCanvas();
         this.setupEventListeners();
+        this.setupSettingsModal();
         this.updateStatus('Ready to play - Generate a maze to start!');
     }
     
@@ -312,49 +323,32 @@ class MazeGame {
     }
     
     drawPlayer() {
-        // Draw player as a heart shape using display position for smooth animation
+        // Draw player as selected emoji character using display position for smooth animation
         const centerX = (this.playerDisplay.x + 0.5) * this.cellSize;
         const centerY = (this.playerDisplay.y + 0.5) * this.cellSize;
-        const size = this.cellSize * 0.8;
         
-        this.ctx.fillStyle = '#e74c3c';
-        this.ctx.beginPath();
+        // Calculate emoji font size based on cell size
+        const fontSize = this.cellSize * 0.8;
         
-        // Heart shape using bezier curves
-        const topCurveHeight = size * 0.3;
-        this.ctx.moveTo(centerX, centerY + topCurveHeight);
+        // Set up text rendering
+        this.ctx.font = `${fontSize}px Arial`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
         
-        // Left side of heart
-        this.ctx.bezierCurveTo(
-            centerX, centerY, 
-            centerX - size / 2, centerY, 
-            centerX - size / 2, centerY + topCurveHeight
-        );
-        this.ctx.bezierCurveTo(
-            centerX - size / 2, centerY + (topCurveHeight / 2), 
-            centerX - size / 4, centerY + (topCurveHeight / 2), 
-            centerX, centerY + topCurveHeight * 2
-        );
+        // Add shadow for better visibility
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        this.ctx.shadowBlur = 3;
+        this.ctx.shadowOffsetX = 1;
+        this.ctx.shadowOffsetY = 1;
         
-        // Right side of heart
-        this.ctx.bezierCurveTo(
-            centerX + size / 4, centerY + (topCurveHeight / 2), 
-            centerX + size / 2, centerY + (topCurveHeight / 2), 
-            centerX + size / 2, centerY + topCurveHeight
-        );
-        this.ctx.bezierCurveTo(
-            centerX + size / 2, centerY, 
-            centerX, centerY, 
-            centerX, centerY + topCurveHeight
-        );
+        // Draw the selected character
+        this.ctx.fillText(this.selectedCharacter, centerX, centerY);
         
-        this.ctx.closePath();
-        this.ctx.fill();
-        
-        // Add a white border for visibility
-        this.ctx.strokeStyle = '#ffffff';
-        this.ctx.lineWidth = 1;
-        this.ctx.stroke();
+        // Reset shadow for other drawing operations
+        this.ctx.shadowColor = 'transparent';
+        this.ctx.shadowBlur = 0;
+        this.ctx.shadowOffsetX = 0;
+        this.ctx.shadowOffsetY = 0;
     }
     
     showSolution() {
@@ -1414,6 +1408,101 @@ class MazeGame {
         }
         
         return component;
+    }
+    
+    // ===== SETTINGS MODAL SYSTEM =====
+    
+    setupSettingsModal() {
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeBtn = settingsModal.querySelector('.close-btn');
+        const characterPreview = document.getElementById('character-preview');
+        
+        // Set initial character preview
+        characterPreview.textContent = this.selectedCharacter;
+        
+        // Settings button click
+        settingsBtn.addEventListener('click', () => {
+            settingsModal.classList.add('show');
+            this.populateCharacterGrid('faces'); // Default to faces category
+        });
+        
+        // Close modal
+        closeBtn.addEventListener('click', () => {
+            settingsModal.classList.remove('show');
+        });
+        
+        // Close modal when clicking outside
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.classList.remove('show');
+            }
+        });
+        
+        // Category tab switching
+        const tabButtons = settingsModal.querySelectorAll('.tab-btn');
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update active tab
+                tabButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Populate character grid for selected category
+                const category = btn.dataset.category;
+                this.populateCharacterGrid(category);
+            });
+        });
+    }
+    
+    populateCharacterGrid(category) {
+        const characterGrid = document.getElementById('character-grid');
+        const characters = this.characterOptions[category];
+        
+        // Clear existing characters
+        characterGrid.innerHTML = '';
+        
+        // Add character options
+        characters.forEach(character => {
+            const characterOption = document.createElement('div');
+            characterOption.className = 'character-option';
+            characterOption.textContent = character;
+            
+            // Mark current character as selected
+            if (character === this.selectedCharacter) {
+                characterOption.classList.add('selected');
+            }
+            
+            // Character selection handler
+            characterOption.addEventListener('click', () => {
+                this.selectCharacter(character);
+                
+                // Update visual selection
+                characterGrid.querySelectorAll('.character-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                characterOption.classList.add('selected');
+            });
+            
+            characterGrid.appendChild(characterOption);
+        });
+    }
+    
+    selectCharacter(character) {
+        this.selectedCharacter = character;
+        
+        // Update character preview in modal
+        document.getElementById('character-preview').textContent = character;
+        
+        // Save to localStorage
+        localStorage.setItem('mazeGameCharacter', character);
+        
+        // Redraw game if maze exists
+        if (this.maze) {
+            this.render();
+        }
+        
+        // Update status
+        this.updateStatus(`Character changed to ${character}! 🎉`, 'success');
     }
 }
 

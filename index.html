@@ -37,6 +37,7 @@
                 <button id="generate">Generate Maze</button>
                 <button id="solve">Show Solution</button>
                 <button id="reset">Reset</button>
+                <button id="settings-btn" class="settings-btn" title="Game Settings">⚙️</button>
             </div>
         </div>
         
@@ -63,6 +64,38 @@
                 <li>Choose different algorithms to see various maze patterns</li>
                 <li>Try different sizes for varying difficulty</li>
             </ul>
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Game Settings</h3>
+                <span class="close-btn">&times;</span>
+            </div>
+            
+            <div class="settings-section">
+                <h4>Choose Your Character</h4>
+                <div class="character-categories">
+                    <div class="category-tabs">
+                        <button class="tab-btn active" data-category="faces">😀 Faces</button>
+                        <button class="tab-btn" data-category="animals">🐱 Animals</button>
+                        <button class="tab-btn" data-category="objects">⚡ Objects</button>
+                        <button class="tab-btn" data-category="nature">🌺 Nature</button>
+                        <button class="tab-btn" data-category="food">🍕 Food</button>
+                    </div>
+                    
+                    <div class="character-grid" id="character-grid">
+                        <!-- Character options populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="current-character">
+                    <span>Current Character: </span>
+                    <span class="character-preview" id="character-preview">❤️</span>
+                </div>
+            </div>
         </div>
     </div>
     
