@@ -75,8 +75,9 @@
                 <span class="close-btn">&times;</span>
             </div>
             
+            <!-- Character Selection Section -->
             <div class="settings-section">
-                <h4>Choose Your Character</h4>
+                <h4>🎭 Choose Your Character</h4>
                 <div class="character-categories">
                     <div class="category-tabs">
                         <button class="tab-btn active" data-category="faces">😀 Faces</button>
@@ -94,6 +95,94 @@
                 <div class="current-character">
                     <span>Current Character: </span>
                     <span class="character-preview" id="character-preview">❤️</span>
+                </div>
+            </div>
+            
+            <!-- Game Settings Section -->
+            <div class="settings-section">
+                <h4>🎮 Game Settings</h4>
+                
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span class="setting-name">Sound Effects</span>
+                        <span class="setting-description">Enable audio feedback and sound effects</span>
+                    </label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="sound-toggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span class="setting-name">Animation Speed</span>
+                        <span class="setting-description">Control player movement animation speed</span>
+                    </label>
+                    <div class="slider-container">
+                        <input type="range" id="animation-speed" min="50" max="500" value="200" class="slider">
+                        <span class="slider-value" id="animation-speed-value">200ms</span>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span class="setting-name">Generation Delay</span>
+                        <span class="setting-description">Add visual delay during maze generation</span>
+                    </label>
+                    <div class="slider-container">
+                        <input type="range" id="generation-delay" min="0" max="100" value="50" class="slider">
+                        <span class="slider-value" id="generation-delay-value">50ms</span>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span class="setting-name">Show Path Trail</span>
+                        <span class="setting-description">Display breadcrumb trail of your path</span>
+                    </label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="trail-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Visual Settings Section -->
+            <div class="settings-section">
+                <h4>🎨 Visual Settings</h4>
+                
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span class="setting-name">Dark Mode</span>
+                        <span class="setting-description">Toggle dark theme (coming soon!)</span>
+                    </label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="dark-mode-toggle" disabled>
+                        <span class="toggle-slider disabled"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span class="setting-name">Particle Effects</span>
+                        <span class="setting-description">Enhanced visual effects (coming soon!)</span>
+                    </label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="particles-toggle" disabled>
+                        <span class="toggle-slider disabled"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Reset Section -->
+            <div class="settings-section">
+                <h4>🔧 System</h4>
+                
+                <div class="setting-item">
+                    <button class="reset-settings-btn" id="reset-settings">
+                        🔄 Reset All Settings
+                    </button>
+                    <span class="setting-description">Restore default settings and clear saved data</span>
                 </div>
             </div>
         </div>

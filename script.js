@@ -11,7 +11,7 @@ class MazeGame {
         this.playerDisplay = { x: 0, y: 0 }; // Visual position for animation
         this.isAnimating = false;
         this.animationProgress = 0;
-        this.animationDuration = 200; // milliseconds
+        this.animationDuration = this.settings.animationSpeed; // milliseconds
         this.gameStarted = false;
         this.gameWon = false;
         this.startTime = null;
@@ -28,6 +28,17 @@ class MazeGame {
             'nature': ['🌺', '🌸', '🌞', '🌙', '☀️', '🌈', '🦋', '🌿', '🌊', '🍀', '🌵', '🌳'],
             'food': ['🍕', '🍔', '🎂', '🍎', '🍊', '🥨', '🧀', '🍪', '🍓', '🥑', '🌮', '🍜']
         };
+        
+        // Game settings
+        this.settings = {
+            soundEnabled: JSON.parse(localStorage.getItem('mazeGameSoundEnabled') ?? 'true'),
+            animationSpeed: parseInt(localStorage.getItem('mazeGameAnimationSpeed') ?? '200'),
+            generationDelay: parseInt(localStorage.getItem('mazeGameGenerationDelay') ?? '50'),
+            showTrail: JSON.parse(localStorage.getItem('mazeGameShowTrail') ?? 'false')
+        };
+        
+        // Trail system
+        this.playerTrail = [];
         
         // Canvas and maze settings
         this.cellSize = 20;
@@ -165,6 +176,7 @@ class MazeGame {
                 this.gameWon = false;
                 this.solutionPath = [];
                 this.showingSolution = false;
+                this.playerTrail = []; // Clear trail on new maze
                 this.renderCache = null; // Clear render cache
                 
                 // Reset solve button
@@ -252,6 +264,11 @@ class MazeGame {
             this.drawSolutionPath();
         }
         
+        // Draw player trail if enabled
+        if (this.settings.showTrail && this.playerTrail.length > 0) {
+            this.drawPlayerTrail();
+        }
+        
         // Draw player
         this.drawPlayer();
     }
@@ -320,6 +337,28 @@ class MazeGame {
             2 * Math.PI
         );
         this.ctx.fill();
+    }
+    
+    drawPlayerTrail() {
+        if (this.playerTrail.length === 0) return;
+        
+        // Draw breadcrumb trail with fading effect
+        this.ctx.fillStyle = 'rgba(52, 152, 219, 0.3)'; // Light blue with transparency
+        
+        this.playerTrail.forEach((position, index) => {
+            const centerX = (position.x + 0.5) * this.cellSize;
+            const centerY = (position.y + 0.5) * this.cellSize;
+            const radius = this.cellSize * 0.15; // Small circle
+            
+            // Create fading effect - older positions are more transparent
+            const opacity = Math.max(0.1, 0.3 - (this.playerTrail.length - index) * 0.02);
+            this.ctx.fillStyle = `rgba(52, 152, 219, ${opacity})`;
+            
+            // Draw small circle for trail
+            this.ctx.beginPath();
+            this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            this.ctx.fill();
+        });
     }
     
     drawPlayer() {
@@ -391,6 +430,7 @@ class MazeGame {
         this.startTime = null;
         this.solutionPath = [];
         this.showingSolution = false;
+        this.playerTrail = []; // Clear trail on reset
         
         // Reset solve button text
         document.getElementById('solve').textContent = 'Show Solution';
@@ -581,6 +621,11 @@ class MazeGame {
         const startX = this.player.x;
         const startY = this.player.y;
         const startTime = Date.now();
+        
+        // Add current position to trail if trail is enabled
+        if (this.settings.showTrail) {
+            this.playerTrail.push({ x: startX, y: startY });
+        }
         
         this.player.x = targetX;
         this.player.y = targetY;
@@ -1421,6 +1466,9 @@ class MazeGame {
         // Set initial character preview
         characterPreview.textContent = this.selectedCharacter;
         
+        // Initialize settings controls
+        this.initializeSettingsControls();
+        
         // Settings button click
         settingsBtn.addEventListener('click', () => {
             settingsModal.classList.add('show');
@@ -1503,6 +1551,103 @@ class MazeGame {
         
         // Update status
         this.updateStatus(`Character changed to ${character}! 🎉`, 'success');
+    }
+    
+    initializeSettingsControls() {
+        // Sound Effects Toggle
+        const soundToggle = document.getElementById('sound-toggle');
+        soundToggle.checked = this.settings.soundEnabled;
+        soundToggle.addEventListener('change', () => {
+            this.settings.soundEnabled = soundToggle.checked;
+            localStorage.setItem('mazeGameSoundEnabled', JSON.stringify(this.settings.soundEnabled));
+        });
+        
+        // Animation Speed Slider
+        const animationSpeedSlider = document.getElementById('animation-speed');
+        const animationSpeedValue = document.getElementById('animation-speed-value');
+        animationSpeedSlider.value = this.settings.animationSpeed;
+        animationSpeedValue.textContent = `${this.settings.animationSpeed}ms`;
+        
+        animationSpeedSlider.addEventListener('input', () => {
+            const value = parseInt(animationSpeedSlider.value);
+            this.settings.animationSpeed = value;
+            this.animationDuration = value;
+            animationSpeedValue.textContent = `${value}ms`;
+            localStorage.setItem('mazeGameAnimationSpeed', value.toString());
+        });
+        
+        // Generation Delay Slider
+        const generationDelaySlider = document.getElementById('generation-delay');
+        const generationDelayValue = document.getElementById('generation-delay-value');
+        generationDelaySlider.value = this.settings.generationDelay;
+        generationDelayValue.textContent = `${this.settings.generationDelay}ms`;
+        
+        generationDelaySlider.addEventListener('input', () => {
+            const value = parseInt(generationDelaySlider.value);
+            this.settings.generationDelay = value;
+            generationDelayValue.textContent = `${value}ms`;
+            localStorage.setItem('mazeGameGenerationDelay', value.toString());
+        });
+        
+        // Show Trail Toggle
+        const trailToggle = document.getElementById('trail-toggle');
+        trailToggle.checked = this.settings.showTrail;
+        trailToggle.addEventListener('change', () => {
+            this.settings.showTrail = trailToggle.checked;
+            localStorage.setItem('mazeGameShowTrail', JSON.stringify(this.settings.showTrail));
+            if (!this.settings.showTrail) {
+                this.playerTrail = [];
+                if (this.maze) {
+                    this.render();
+                }
+            }
+        });
+        
+        // Reset Settings Button
+        const resetSettingsBtn = document.getElementById('reset-settings');
+        resetSettingsBtn.addEventListener('click', () => {
+            this.resetAllSettings();
+        });
+    }
+    
+    resetAllSettings() {
+        // Confirm with user
+        if (!confirm('Are you sure you want to reset all settings to default values? This action cannot be undone.')) {
+            return;
+        }
+        
+        // Reset to default values
+        this.settings = {
+            soundEnabled: true,
+            animationSpeed: 200,
+            generationDelay: 50,
+            showTrail: false
+        };
+        
+        this.selectedCharacter = '❤️';
+        this.animationDuration = 200;
+        this.playerTrail = [];
+        
+        // Clear localStorage
+        localStorage.removeItem('mazeGameSoundEnabled');
+        localStorage.removeItem('mazeGameAnimationSpeed');
+        localStorage.removeItem('mazeGameGenerationDelay');
+        localStorage.removeItem('mazeGameShowTrail');
+        localStorage.removeItem('mazeGameCharacter');
+        
+        // Update UI controls
+        this.initializeSettingsControls();
+        
+        // Update character preview
+        document.getElementById('character-preview').textContent = this.selectedCharacter;
+        
+        // Redraw game if maze exists
+        if (this.maze) {
+            this.render();
+        }
+        
+        // Show feedback
+        alert('All settings have been reset to default values.');
     }
 }
 
