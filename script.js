@@ -5,13 +5,21 @@ class MazeGame {
         this.timer = document.getElementById('timer');
         this.status = document.getElementById('status');
         
+        // Game settings (initialize first)
+        this.settings = {
+            soundEnabled: JSON.parse(localStorage.getItem('mazeGameSoundEnabled') ?? 'true'),
+            animationSpeed: parseInt(localStorage.getItem('mazeGameAnimationSpeed') ?? '200'),
+            generationDelay: parseInt(localStorage.getItem('mazeGameGenerationDelay') ?? '50'),
+            showTrail: JSON.parse(localStorage.getItem('mazeGameShowTrail') ?? 'false')
+        };
+        
         // Game state
         this.maze = null;
         this.player = { x: 0, y: 0 };
         this.playerDisplay = { x: 0, y: 0 }; // Visual position for animation
         this.isAnimating = false;
         this.animationProgress = 0;
-        this.animationDuration = this.settings.animationSpeed; // milliseconds
+        this.animationDuration = this.settings.animationSpeed; // Now settings is defined
         this.gameStarted = false;
         this.gameWon = false;
         this.startTime = null;
@@ -27,14 +35,6 @@ class MazeGame {
             'objects': ['⚡', '🔥', '💎', '⭐', '🌟', '💫', '🎯', '🎪', '🎭', '🎨', '🎵', '⚽'],
             'nature': ['🌺', '🌸', '🌞', '🌙', '☀️', '🌈', '🦋', '🌿', '🌊', '🍀', '🌵', '🌳'],
             'food': ['🍕', '🍔', '🎂', '🍎', '🍊', '🥨', '🧀', '🍪', '🍓', '🥑', '🌮', '🍜']
-        };
-        
-        // Game settings
-        this.settings = {
-            soundEnabled: JSON.parse(localStorage.getItem('mazeGameSoundEnabled') ?? 'true'),
-            animationSpeed: parseInt(localStorage.getItem('mazeGameAnimationSpeed') ?? '200'),
-            generationDelay: parseInt(localStorage.getItem('mazeGameGenerationDelay') ?? '50'),
-            showTrail: JSON.parse(localStorage.getItem('mazeGameShowTrail') ?? 'false')
         };
         
         // Trail system

@@ -231,7 +231,7 @@ mazegame/
 - [ ] **Theme System**: Dark mode, neon, retro, nature themes
 - [ ] **Particle Effects**: Trail effects, win celebrations, magical elements
 - [ ] **Minimap Display**: Small overview of entire maze with player position
-- [ ] **Breadcrumb Trail**: Visual path showing where player has been
+- [x] **Breadcrumb Trail**: Visual path showing where player has been
 - [ ] **3D Maze Rendering**: Optional isometric or first-person view
 - [x] **Settings Modal**: Centralized configuration panel
 
@@ -275,8 +275,8 @@ mazegame/
 ## Implementation Priority
 
 ### High Priority (Next Sprint)
-1. **Character Selection with Emojis** - Easy win, high user engagement
-2. **Settings Modal** - Foundation for future configuration options
+1. [x] **Character Selection with Emojis** - Easy win, high user engagement
+2. [x] **Settings Modal** - Foundation for future configuration options
 3. **Theme System** - Visual variety with minimal complexity
 4. **Mobile Touch Controls** - Expand accessibility
 
