@@ -1,0 +1,316 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    color: #2c3e50;
+    font-size: 2.5rem;
+    font-weight: 300;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-group label {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+select {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+select:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+select:hover {
+    border-color: #bbb;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#generate {
+    background: #27ae60;
+    color: white;
+}
+
+#generate:hover {
+    background: #229954;
+    transform: translateY(-1px);
+}
+
+#solve {
+    background: #f39c12;
+    color: white;
+}
+
+#solve:hover {
+    background: #e67e22;
+    transform: translateY(-1px);
+}
+
+#reset {
+    background: #e74c3c;
+    color: white;
+}
+
+#reset:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+button:disabled:hover {
+    transform: none !important;
+}
+
+/* Game Info */
+.game-info {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-item .label {
+    font-weight: 600;
+    color: #555;
+}
+
+#timer {
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+#status {
+    font-weight: 500;
+    color: #27ae60;
+    transition: color 0.3s ease;
+}
+
+#status.generating {
+    color: #f39c12;
+}
+
+#status.error {
+    color: #e74c3c;
+}
+
+#status.success {
+    color: #27ae60;
+}
+
+/* Game Area */
+.game-area {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+#maze-canvas {
+    border: 3px solid #34495e;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    max-width: 100%;
+    height: auto;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#maze-canvas.generating {
+    opacity: 0.7;
+    transform: scale(0.98);
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pulse {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Instructions */
+.instructions {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.instructions h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.instructions ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.instructions li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 20px;
+}
+
+.instructions li:last-child {
+    border-bottom: none;
+}
+
+.instructions li::before {
+    content: "▶";
+    position: absolute;
+    left: 0;
+    color: #3498db;
+    font-size: 0.8rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .control-group {
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .game-info {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    #maze-canvas {
+        width: 100%;
+        max-width: 400px;
+        height: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .control-group {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    button {
+        width: 100%;
+        max-width: 200px;
+    }
+}

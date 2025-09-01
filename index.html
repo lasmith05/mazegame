@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Maze Game</h1>
+        </header>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="algorithm">Algorithm:</label>
+                <select id="algorithm">
+                    <option value="recursive-backtracking">Recursive Backtracking</option>
+                    <option value="binary-tree">Binary Tree</option>
+                    <option value="eller">Eller's Algorithm</option>
+                    <option value="prim">Prim's Algorithm</option>
+                    <option value="recursive-division">Recursive Division</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="size">Maze Size:</label>
+                <select id="size">
+                    <option value="small">Small (15x15)</option>
+                    <option value="medium">Medium (25x25)</option>
+                    <option value="large">Large (35x35)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <button id="generate">Generate Maze</button>
+                <button id="solve">Show Solution</button>
+                <button id="reset">Reset</button>
+            </div>
+        </div>
+        
+        <div class="game-info">
+            <div class="info-item">
+                <span class="label">Timer:</span>
+                <span id="timer">00:00</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Status:</span>
+                <span id="status">Ready to play</span>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <canvas id="maze-canvas" width="800" height="600"></canvas>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to Play</h3>
+            <ul>
+                <li>Use WASD keys to move your character</li>
+                <li>Navigate from the start (top-left) to the exit (bottom-right)</li>
+                <li>Choose different algorithms to see various maze patterns</li>
+                <li>Try different sizes for varying difficulty</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
