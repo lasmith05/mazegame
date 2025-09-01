@@ -10,7 +10,8 @@ class MazeGame {
             soundEnabled: JSON.parse(localStorage.getItem('mazeGameSoundEnabled') ?? 'true'),
             animationSpeed: parseInt(localStorage.getItem('mazeGameAnimationSpeed') ?? '200'),
             generationDelay: parseInt(localStorage.getItem('mazeGameGenerationDelay') ?? '50'),
-            showTrail: JSON.parse(localStorage.getItem('mazeGameShowTrail') ?? 'false')
+            showTrail: JSON.parse(localStorage.getItem('mazeGameShowTrail') ?? 'false'),
+            theme: localStorage.getItem('mazeGameTheme') || 'light'
         };
         
         // Game state
@@ -59,6 +60,7 @@ class MazeGame {
         this.initializeCanvas();
         this.setupEventListeners();
         this.setupSettingsModal();
+        this.applyTheme(this.settings.theme); // Apply saved theme
         this.updateStatus('Ready to play - Generate a maze to start!');
     }
     
@@ -252,8 +254,9 @@ class MazeGame {
         }
         this.lastRenderTime = now;
         
-        // Clear canvas
-        this.ctx.fillStyle = '#ffffff';
+        // Clear canvas with theme-aware background
+        const canvasBg = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
+        this.ctx.fillStyle = canvasBg;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
         // Draw maze (use cached version if available)
@@ -273,49 +276,15 @@ class MazeGame {
         this.drawPlayer();
     }
     
-    drawMaze() {
-        this.ctx.strokeStyle = '#2c3e50';
-        this.ctx.lineWidth = this.wallThickness;
-        
-        // Batch wall drawing for better performance
-        this.ctx.beginPath();
-        
-        for (let y = 0; y < this.mazeHeight; y++) {
-            for (let x = 0; x < this.mazeWidth; x++) {
-                const cell = this.maze[y][x];
-                const pixelX = x * this.cellSize;
-                const pixelY = y * this.cellSize;
-                
-                // Draw walls - batch all moves and lines
-                if (cell.walls.top) {
-                    this.ctx.moveTo(pixelX, pixelY);
-                    this.ctx.lineTo(pixelX + this.cellSize, pixelY);
-                }
-                if (cell.walls.right) {
-                    this.ctx.moveTo(pixelX + this.cellSize, pixelY);
-                    this.ctx.lineTo(pixelX + this.cellSize, pixelY + this.cellSize);
-                }
-                if (cell.walls.bottom) {
-                    this.ctx.moveTo(pixelX + this.cellSize, pixelY + this.cellSize);
-                    this.ctx.lineTo(pixelX, pixelY + this.cellSize);
-                }
-                if (cell.walls.left) {
-                    this.ctx.moveTo(pixelX, pixelY + this.cellSize);
-                    this.ctx.lineTo(pixelX, pixelY);
-                }
-            }
-        }
-        
-        // Single stroke call for all walls
-        this.ctx.stroke();
-        
-        // Draw start indicator
-        this.drawStartEnd();
-    }
+    // Moved to theme-aware version at the end of the class
     
     drawStartEnd() {
+        // Get theme colors
+        const greenColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-green').trim();
+        const redColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-red').trim();
+        
         // Start (top-left) - green circle
-        this.ctx.fillStyle = '#27ae60';
+        this.ctx.fillStyle = greenColor;
         this.ctx.beginPath();
         this.ctx.arc(
             this.cellSize / 2, 
@@ -327,7 +296,7 @@ class MazeGame {
         this.ctx.fill();
         
         // End (bottom-right) - red circle
-        this.ctx.fillStyle = '#e74c3c';
+        this.ctx.fillStyle = redColor;
         this.ctx.beginPath();
         this.ctx.arc(
             (this.mazeWidth - 0.5) * this.cellSize,
@@ -339,27 +308,7 @@ class MazeGame {
         this.ctx.fill();
     }
     
-    drawPlayerTrail() {
-        if (this.playerTrail.length === 0) return;
-        
-        // Draw breadcrumb trail with fading effect
-        this.ctx.fillStyle = 'rgba(52, 152, 219, 0.3)'; // Light blue with transparency
-        
-        this.playerTrail.forEach((position, index) => {
-            const centerX = (position.x + 0.5) * this.cellSize;
-            const centerY = (position.y + 0.5) * this.cellSize;
-            const radius = this.cellSize * 0.15; // Small circle
-            
-            // Create fading effect - older positions are more transparent
-            const opacity = Math.max(0.1, 0.3 - (this.playerTrail.length - index) * 0.02);
-            this.ctx.fillStyle = `rgba(52, 152, 219, ${opacity})`;
-            
-            // Draw small circle for trail
-            this.ctx.beginPath();
-            this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            this.ctx.fill();
-        });
-    }
+    // Moved to theme-aware version at the end of the class
     
     drawPlayer() {
         // Draw player as selected emoji character using display position for smooth animation
@@ -1603,6 +1552,16 @@ class MazeGame {
             }
         });
         
+        // Theme Selector
+        const themeSelector = document.getElementById('theme-selector');
+        themeSelector.value = this.settings.theme;
+        themeSelector.addEventListener('change', () => {
+            const selectedTheme = themeSelector.value;
+            this.settings.theme = selectedTheme;
+            this.applyTheme(selectedTheme);
+            localStorage.setItem('mazeGameTheme', selectedTheme);
+        });
+        
         // Reset Settings Button
         const resetSettingsBtn = document.getElementById('reset-settings');
         resetSettingsBtn.addEventListener('click', () => {
@@ -1621,7 +1580,8 @@ class MazeGame {
             soundEnabled: true,
             animationSpeed: 200,
             generationDelay: 50,
-            showTrail: false
+            showTrail: false,
+            theme: 'light'
         };
         
         this.selectedCharacter = '❤️';
@@ -1633,13 +1593,15 @@ class MazeGame {
         localStorage.removeItem('mazeGameAnimationSpeed');
         localStorage.removeItem('mazeGameGenerationDelay');
         localStorage.removeItem('mazeGameShowTrail');
+        localStorage.removeItem('mazeGameTheme');
         localStorage.removeItem('mazeGameCharacter');
         
         // Update UI controls
         this.initializeSettingsControls();
         
-        // Update character preview
+        // Update character preview and theme
         document.getElementById('character-preview').textContent = this.selectedCharacter;
+        this.applyTheme(this.settings.theme);
         
         // Redraw game if maze exists
         if (this.maze) {
@@ -1648,6 +1610,95 @@ class MazeGame {
         
         // Show feedback
         alert('All settings have been reset to default values.');
+    }
+    
+    applyTheme(themeName) {
+        // Apply theme by setting data-theme attribute on body
+        document.body.setAttribute('data-theme', themeName);
+        
+        // Update canvas rendering to use new theme colors
+        if (this.maze) {
+            this.render();
+        }
+    }
+    
+    // Override drawMaze to use theme colors
+    drawMaze() {
+        // Get current theme's maze wall color from CSS custom property
+        const mazeWallColor = getComputedStyle(document.documentElement).getPropertyValue('--maze-wall').trim();
+        
+        this.ctx.strokeStyle = mazeWallColor;
+        this.ctx.lineWidth = this.wallThickness;
+        
+        // Batch wall drawing for better performance
+        this.ctx.beginPath();
+        
+        for (let y = 0; y < this.mazeHeight; y++) {
+            for (let x = 0; x < this.mazeWidth; x++) {
+                const cell = this.maze[y][x];
+                const pixelX = x * this.cellSize;
+                const pixelY = y * this.cellSize;
+                
+                // Draw walls - batch all moves and lines
+                if (cell.walls.top) {
+                    this.ctx.moveTo(pixelX, pixelY);
+                    this.ctx.lineTo(pixelX + this.cellSize, pixelY);
+                }
+                if (cell.walls.right) {
+                    this.ctx.moveTo(pixelX + this.cellSize, pixelY);
+                    this.ctx.lineTo(pixelX + this.cellSize, pixelY + this.cellSize);
+                }
+                if (cell.walls.bottom) {
+                    this.ctx.moveTo(pixelX + this.cellSize, pixelY + this.cellSize);
+                    this.ctx.lineTo(pixelX, pixelY + this.cellSize);
+                }
+                if (cell.walls.left) {
+                    this.ctx.moveTo(pixelX, pixelY + this.cellSize);
+                    this.ctx.lineTo(pixelX, pixelY);
+                }
+            }
+        }
+        
+        // Draw all walls in one stroke for performance
+        this.ctx.stroke();
+        
+        // Draw start and end indicators
+        this.drawStartEnd();
+    }
+    
+    // Override drawPlayerTrail to use theme colors
+    drawPlayerTrail() {
+        if (this.playerTrail.length === 0) return;
+        
+        // Get current theme's trail color from CSS custom property
+        const trailColor = getComputedStyle(document.documentElement).getPropertyValue('--trail-color').trim();
+        
+        this.playerTrail.forEach((position, index) => {
+            const centerX = (position.x + 0.5) * this.cellSize;
+            const centerY = (position.y + 0.5) * this.cellSize;
+            const radius = this.cellSize * 0.15; // Small circle
+            
+            // Create fading effect - older positions are more transparent
+            const opacity = Math.max(0.1, 0.3 - (this.playerTrail.length - index) * 0.02);
+            
+            // Extract RGB values from CSS custom property and apply opacity
+            let color = trailColor;
+            if (color.includes('rgba')) {
+                // If already rgba, use as is
+                this.ctx.fillStyle = color.replace(/[\d\.]+\)$/g, `${opacity})`);
+            } else if (color.includes('rgb')) {
+                // Convert rgb to rgba
+                this.ctx.fillStyle = color.replace('rgb', 'rgba').replace(')', `, ${opacity})`);
+            } else {
+                // Fallback
+                this.ctx.fillStyle = `rgba(52, 152, 219, ${opacity})`;
+            }
+            
+            // Draw small circle for trail
+            this.ctx.beginPath();
+            this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            this.ctx.fill();
+        });
     }
 }
 
