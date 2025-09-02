@@ -11,7 +11,8 @@ class MazeGame {
             animationSpeed: parseInt(localStorage.getItem('mazeGameAnimationSpeed') ?? '200'),
             generationDelay: parseInt(localStorage.getItem('mazeGameGenerationDelay') ?? '50'),
             showTrail: JSON.parse(localStorage.getItem('mazeGameShowTrail') ?? 'false'),
-            theme: localStorage.getItem('mazeGameTheme') || 'light'
+            theme: localStorage.getItem('mazeGameTheme') || 'light',
+            mobileControls: JSON.parse(localStorage.getItem('mazeGameMobileControls') ?? 'false')
         };
         
         // Game state
@@ -60,7 +61,14 @@ class MazeGame {
         this.initializeCanvas();
         this.setupEventListeners();
         this.setupSettingsModal();
+        this.setupMobileControls();
         this.applyTheme(this.settings.theme); // Apply saved theme
+        
+        // Handle window resize for mobile controls visibility
+        window.addEventListener('resize', () => {
+            this.updateMobileControlsVisibility();
+        });
+        
         this.updateStatus('Ready to play - Generate a maze to start!');
     }
     
@@ -1406,6 +1414,138 @@ class MazeGame {
     
     // ===== SETTINGS MODAL SYSTEM =====
     
+    setupMobileControls() {
+        // Touch/swipe gesture variables
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchEndX = 0;
+        this.touchEndY = 0;
+        this.minSwipeDistance = 30;
+        
+        // Set up canvas touch events for swipe gestures
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent scrolling
+            const touch = e.touches[0];
+            this.touchStartX = touch.clientX;
+            this.touchStartY = touch.clientY;
+        }, { passive: false });
+        
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            this.touchEndX = touch.clientX;
+            this.touchEndY = touch.clientY;
+            this.handleSwipe();
+        }, { passive: false });
+        
+        // Set up D-pad button controls
+        const dpadButtons = document.querySelectorAll('.dpad-btn');
+        dpadButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const direction = btn.dataset.direction;
+                this.handleMobileMove(direction);
+            });
+            
+            // Add visual feedback for touch
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                btn.style.transform = 'translateY(0) scale(0.95)';
+            });
+            
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                btn.style.transform = '';
+                const direction = btn.dataset.direction;
+                this.handleMobileMove(direction);
+            });
+        });
+        
+        // Toggle controls visibility
+        const toggleBtn = document.getElementById('toggle-controls');
+        const mobileControls = document.getElementById('mobile-controls');
+        
+        toggleBtn.addEventListener('click', () => {
+            const controlMethods = mobileControls.querySelector('.control-methods');
+            if (controlMethods.style.display === 'none') {
+                controlMethods.style.display = 'flex';
+                toggleBtn.textContent = '📱';
+            } else {
+                controlMethods.style.display = 'none';
+                toggleBtn.textContent = '👆';
+            }
+        });
+    }
+    
+    handleSwipe() {
+        if (!this.maze || this.gameWon || this.isAnimating) return;
+        
+        const deltaX = this.touchEndX - this.touchStartX;
+        const deltaY = this.touchEndY - this.touchStartY;
+        
+        // Check if swipe distance is sufficient
+        if (Math.abs(deltaX) < this.minSwipeDistance && Math.abs(deltaY) < this.minSwipeDistance) {
+            return;
+        }
+        
+        // Determine primary direction
+        let direction = '';
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // Horizontal swipe
+            direction = deltaX > 0 ? 'right' : 'left';
+        } else {
+            // Vertical swipe
+            direction = deltaY > 0 ? 'down' : 'up';
+        }
+        
+        this.handleMobileMove(direction);
+    }
+    
+    handleMobileMove(direction) {
+        if (!this.maze || this.gameWon || this.isAnimating) return;
+        
+        // Start timer on first movement
+        if (!this.gameStarted) {
+            this.startTimer();
+            this.gameStarted = true;
+        }
+        
+        let newX = this.player.x;
+        let newY = this.player.y;
+        let moved = false;
+        
+        switch (direction) {
+            case 'up':
+                if (this.canMove(this.player.x, this.player.y, 'up')) {
+                    newY--;
+                    moved = true;
+                }
+                break;
+            case 'left':
+                if (this.canMove(this.player.x, this.player.y, 'left')) {
+                    newX--;
+                    moved = true;
+                }
+                break;
+            case 'down':
+                if (this.canMove(this.player.x, this.player.y, 'down')) {
+                    newY++;
+                    moved = true;
+                }
+                break;
+            case 'right':
+                if (this.canMove(this.player.x, this.player.y, 'right')) {
+                    newX++;
+                    moved = true;
+                }
+                break;
+        }
+        
+        if (moved) {
+            this.animatePlayerTo(newX, newY);
+        }
+    }
+    
     setupSettingsModal() {
         const settingsBtn = document.getElementById('settings-btn');
         const settingsModal = document.getElementById('settings-modal');
@@ -1562,6 +1702,17 @@ class MazeGame {
             localStorage.setItem('mazeGameTheme', selectedTheme);
         });
         
+        // Mobile Controls Toggle
+        const mobileControlsToggle = document.getElementById('mobile-controls-toggle');
+        mobileControlsToggle.checked = this.settings.mobileControls;
+        this.updateMobileControlsVisibility();
+        
+        mobileControlsToggle.addEventListener('change', () => {
+            this.settings.mobileControls = mobileControlsToggle.checked;
+            localStorage.setItem('mazeGameMobileControls', JSON.stringify(this.settings.mobileControls));
+            this.updateMobileControlsVisibility();
+        });
+        
         // Reset Settings Button
         const resetSettingsBtn = document.getElementById('reset-settings');
         resetSettingsBtn.addEventListener('click', () => {
@@ -1581,7 +1732,8 @@ class MazeGame {
             animationSpeed: 200,
             generationDelay: 50,
             showTrail: false,
-            theme: 'light'
+            theme: 'light',
+            mobileControls: false
         };
         
         this.selectedCharacter = '❤️';
@@ -1594,6 +1746,7 @@ class MazeGame {
         localStorage.removeItem('mazeGameGenerationDelay');
         localStorage.removeItem('mazeGameShowTrail');
         localStorage.removeItem('mazeGameTheme');
+        localStorage.removeItem('mazeGameMobileControls');
         localStorage.removeItem('mazeGameCharacter');
         
         // Update UI controls
@@ -1602,6 +1755,7 @@ class MazeGame {
         // Update character preview and theme
         document.getElementById('character-preview').textContent = this.selectedCharacter;
         this.applyTheme(this.settings.theme);
+        this.updateMobileControlsVisibility();
         
         // Redraw game if maze exists
         if (this.maze) {
@@ -1610,6 +1764,17 @@ class MazeGame {
         
         // Show feedback
         alert('All settings have been reset to default values.');
+    }
+    
+    updateMobileControlsVisibility() {
+        const mobileControls = document.getElementById('mobile-controls');
+        const isMobile = window.innerWidth <= 768 || (window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches);
+        
+        if (this.settings.mobileControls || isMobile) {
+            mobileControls.classList.add('show');
+        } else {
+            mobileControls.classList.remove('show');
+        }
     }
     
     applyTheme(themeName) {

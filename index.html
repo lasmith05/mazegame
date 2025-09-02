@@ -56,10 +56,37 @@
             <canvas id="maze-canvas" width="800" height="600"></canvas>
         </div>
         
+        <!-- Mobile Controls -->
+        <div id="mobile-controls" class="mobile-controls">
+            <div class="controls-header">
+                <span class="controls-title">Touch Controls</span>
+                <button id="toggle-controls" class="toggle-controls-btn" title="Toggle Controls">📱</button>
+            </div>
+            <div class="control-methods">
+                <div class="control-method">
+                    <h4>📱 Swipe on Maze</h4>
+                    <p>Swipe up/down/left/right on the maze to move</p>
+                </div>
+                <div class="control-method">
+                    <h4>🎮 WASD Controls</h4>
+                    <p>Tap the W-A-S-D buttons to move (same as keyboard)</p>
+                    <div class="dpad-container">
+                        <div class="dpad">
+                            <button class="dpad-btn dpad-up" data-direction="up">W</button>
+                            <button class="dpad-btn dpad-left" data-direction="left">A</button>
+                            <button class="dpad-btn dpad-down" data-direction="down">S</button>
+                            <button class="dpad-btn dpad-right" data-direction="right">D</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="instructions">
             <h3>How to Play</h3>
             <ul>
-                <li>Use WASD keys to move your character</li>
+                <li><strong>Desktop:</strong> Use WASD or arrow keys to move</li>
+                <li><strong>Mobile:</strong> Swipe on the maze or use D-pad buttons</li>
                 <li>Navigate from the start (top-left) to the exit (bottom-right)</li>
                 <li>Choose different algorithms to see various maze patterns</li>
                 <li>Try different sizes for varying difficulty</li>
@@ -142,6 +169,17 @@
                     </label>
                     <label class="toggle-switch">
                         <input type="checkbox" id="trail-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span class="setting-name">Mobile Controls</span>
+                        <span class="setting-description">Show touch controls (auto-enabled on mobile)</span>
+                    </label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="mobile-controls-toggle">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
